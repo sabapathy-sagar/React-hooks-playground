@@ -15,11 +15,17 @@ const NoteApp = () => {
     setTitle("");
   };
 
+  const removeNote = title =>
+    setNotes(notes.filter(note => note.title !== title));
+
   return (
     <div>
       <h2>Notes</h2>
       {notes.map(note => (
-        <div key={note.title}>{note.title}</div>
+        <div key={note.title}>
+          <h3>{note.title}</h3>
+          <button onClick={() => removeNote(note.title)}>X</button>
+        </div>
       ))}
       <form onSubmit={addNote}>
         <input value={title} onChange={updateTitle} />

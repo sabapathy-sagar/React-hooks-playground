@@ -1,32 +1,50 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useReducer } from "react";
 import ReactDOM from "react-dom";
 
-import "./styles.css";
+const notesReducer = (state, action) => {
+  switch (action.type) {
+    case "POPULATE_NOTES":
+      return action.notes;
+    case "ADD_NOTE":
+      return [...state, { title: action.title, body: action.body }];
+    case "REMOVE_NOTE":
+      return state.filter(note => note.title !== action.title);
+    default:
+      return state;
+  }
+};
 
 const NoteApp = () => {
-  const [notes, setNotes] = useState([]);
+  const [notes, dispatch] = useReducer(notesReducer, []);
   const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
 
-  const updateTitle = e => setTitle(e.target.value);
   const addNote = e => {
     e.preventDefault();
-    setNotes([...notes, { title }]);
-    //clear the tilte after adding it to the notes
+    dispatch({
+      type: "ADD_NOTE",
+      title,
+      body
+    });
     setTitle("");
+    setBody("");
   };
 
-  const removeNote = title =>
-    setNotes(notes.filter(note => note.title !== title));
+  const removeNote = title => {
+    dispatch({
+      type: "REMOVE_NOTE",
+      title
+    });
+  };
 
-  // get the data from localStorage when component mounts
   useEffect(() => {
-    const notesData = JSON.parse(localStorage.getItem("notes"));
-    if (notesData) {
-      setNotes(notesData);
+    const notes = JSON.parse(localStorage.getItem("notes"));
+
+    if (notes) {
+      dispatch({ type: "POPULATE_NOTES", notes });
     }
   }, []);
 
-  // store the notes in localStorage
   useEffect(
     () => {
       localStorage.setItem("notes", JSON.stringify(notes));
@@ -36,13 +54,15 @@ const NoteApp = () => {
 
   return (
     <div>
-      <h2>Notes</h2>
+      <h1>Notes</h1>
       {notes.map(note => (
         <Note key={note.title} note={note} removeNote={removeNote} />
       ))}
+      <p>Add note</p>
       <form onSubmit={addNote}>
-        <input value={title} onChange={updateTitle} />
-        <button>Add Note</button>
+        <input value={title} onChange={e => setTitle(e.target.value)} />
+        <textarea value={body} onChange={e => setBody(e.target.value)} />
+        <button>add note</button>
       </form>
     </div>
   );
@@ -50,18 +70,20 @@ const NoteApp = () => {
 
 const Note = ({ note, removeNote }) => {
   useEffect(() => {
-    // clean up -- component did unmount
+    console.log("Setting up effect!");
+
     return () => {
-      console.log("Cleaning up!");
+      console.log("Cleaning up effect!");
     };
   }, []);
+
   return (
     <div>
       <h3>{note.title}</h3>
-      <button onClick={() => removeNote(note.title)}>X</button>
+      <p>{note.body}</p>
+      <button onClick={() => removeNote(note.title)}>x</button>
     </div>
   );
 };
 
-const rootElement = document.getElementById("root");
-ReactDOM.render(<NoteApp />, rootElement);
+ReactDOM.render(<NoteApp />, document.getElementById("root"));

@@ -15,6 +15,9 @@ const NoteApp = () => {
     setTitle("");
   };
 
+  const removeNote = title =>
+    setNotes(notes.filter(note => note.title !== title));
+
   // get the data from localStorage when component mounts
   useEffect(() => {
     const notesData = JSON.parse(localStorage.getItem("notes"));
@@ -30,17 +33,12 @@ const NoteApp = () => {
     },
     [notes]
   );
-  const removeNote = title =>
-    setNotes(notes.filter(note => note.title !== title));
 
   return (
     <div>
       <h2>Notes</h2>
       {notes.map(note => (
-        <div key={note.title}>
-          <h3>{note.title}</h3>
-          <button onClick={() => removeNote(note.title)}>X</button>
-        </div>
+        <Note key={note.title} note={note} removeNote={removeNote} />
       ))}
       <form onSubmit={addNote}>
         <input value={title} onChange={updateTitle} />
@@ -50,33 +48,20 @@ const NoteApp = () => {
   );
 };
 
-// function App({ initCount }) {
-//   const [count, setCount] = useState(initCount || 0);
-//   const [text, setText] = useState("");
-
-//   useEffect(() => {
-//     console.log("use effect");
-//     document.title = count;
-//   });
-
-//   const increment = () => setCount(count + 1);
-//   const decrement = () => setCount(count - 1);
-//   const reset = () => setCount(initCount || 0);
-//   const updateText = e => setText(e.target.value);
-
-//   return (
-//     <div className="App">
-//       <h1>Bonjour!</h1>
-//       <p>
-//         {text}: {count}
-//       </p>
-//       <button onClick={increment}>+1</button>
-//       <button onClick={decrement}>-1</button>
-//       <button onClick={reset}>RESET</button>
-//       <input value={text} onChange={updateText} />
-//     </div>
-//   );
-// }
+const Note = ({ note, removeNote }) => {
+  useEffect(() => {
+    // clean up -- component did unmount
+    return () => {
+      console.log("Cleaning up!");
+    };
+  }, []);
+  return (
+    <div>
+      <h3>{note.title}</h3>
+      <button onClick={() => removeNote(note.title)}>X</button>
+    </div>
+  );
+};
 
 const rootElement = document.getElementById("root");
 ReactDOM.render(<NoteApp />, rootElement);

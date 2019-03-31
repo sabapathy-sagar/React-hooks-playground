@@ -4,8 +4,7 @@ import ReactDOM from "react-dom";
 import "./styles.css";
 
 const NoteApp = () => {
-  const notesData = JSON.parse(localStorage.getItem("notes"));
-  const [notes, setNotes] = useState(notesData || []);
+  const [notes, setNotes] = useState([]);
   const [title, setTitle] = useState("");
 
   const updateTitle = e => setTitle(e.target.value);
@@ -16,10 +15,21 @@ const NoteApp = () => {
     setTitle("");
   };
 
-  //store the notes in localStorage
+  // get the data from localStorage when component mounts
   useEffect(() => {
-    localStorage.setItem("notes", JSON.stringify(notes));
-  });
+    const notesData = JSON.parse(localStorage.getItem("notes"));
+    if (notesData) {
+      setNotes(notesData);
+    }
+  }, []);
+
+  // store the notes in localStorage
+  useEffect(
+    () => {
+      localStorage.setItem("notes", JSON.stringify(notes));
+    },
+    [notes]
+  );
   const removeNote = title =>
     setNotes(notes.filter(note => note.title !== title));
 
